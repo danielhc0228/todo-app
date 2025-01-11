@@ -1,8 +1,15 @@
-import { useRecoilState, useRecoilValue } from "recoil";
+import { useRecoilState, useRecoilValue, useSetRecoilState } from "recoil";
 import { Categories, categoryState, toDoSelector } from "../atom";
 import styled from "styled-components";
 import CreateToDo from "./CreateToDo";
 import ToDo from "./ToDo";
+import { isDarkAtom } from "../atom";
+
+const HR = styled.hr`
+    height: 12px;
+    border: 0;
+    box-shadow: inset 0 12px 12px -12px rgba(0, 0, 0, 0.5);
+`;
 
 const TitleContainer = styled.div`
     text-align: center;
@@ -13,6 +20,7 @@ const Title = styled.h1`
     font-size: 2rem;
     font-weight: bold;
     margin-bottom: 10px; /* Space below the title */
+    color: ${(props) => props.theme.accentColor};
 `;
 
 const Tabs = styled.div`
@@ -31,8 +39,9 @@ const Tab = styled.button<{ isActive: boolean }>`
     height: 40px;
     width: 70px;
     margin: 5px;
+    border: none;
     background-color: ${(props) =>
-        props.isActive ? props.theme.accentColor : props.theme.textColor};
+        props.isActive ? props.theme.accentColor : props.theme.cardBgColor};
     border-radius: 10px;
     color: ${(props) =>
         props.isActive ? props.theme.textColor : props.theme.accentColor};
@@ -42,7 +51,7 @@ const Tab = styled.button<{ isActive: boolean }>`
         box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
         transform: translateY(-2px);
         background-color: ${(props) =>
-            props.isActive ? props.theme.textColor : props.theme.accentColor};
+            props.isActive ? props.theme.tabColor : props.theme.accentColor};
         color: ${(props) =>
             props.isActive ? props.theme.accentColor : props.theme.textColor};
     }
@@ -71,7 +80,34 @@ const TodoHeading = styled.h2`
     color: #333; /* Darker text for better readability */
 `;
 
+const Toggle = styled.button`
+    position: fixed; /* Changed from absolute to fixed for consistent placement */
+    bottom: 20px; /* Distance from the bottom of the viewport */
+    left: 20px; /* Distance from the left of the viewport */
+    color: ${(props) => props.theme.accentColor};
+    background: #5e5df0;
+    border-radius: 999px;
+    box-shadow: #5e5df0 0 10px 20px -10px;
+    box-sizing: border-box;
+    color: #ffffff;
+    cursor: pointer;
+    font-size: 25px;
+    font-weight: 500;
+    opacity: 1;
+    outline: 0 solid transparent;
+    padding: 2px 20px;
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: manipulation;
+    width: fit-content;
+    word-break: break-word;
+    border: 0;
+`;
+
 function ToDoList() {
+    const isDark = useRecoilValue(isDarkAtom);
+    const setDarkAtom = useSetRecoilState(isDarkAtom);
+    const toggleDarkAtom = () => setDarkAtom((prev) => !prev);
     const toDos = useRecoilValue(toDoSelector);
     const [category, setCategory] = useRecoilState(categoryState);
     const onInput = (event: React.MouseEvent<HTMLButtonElement>) => {
@@ -85,9 +121,9 @@ function ToDoList() {
         <div>
             <TitleContainer>
                 <Title>To Do List</Title>
-                <hr></hr>
+                <HR></HR>
             </TitleContainer>
-
+            <Toggle onClick={toggleDarkAtom}>{isDark ? "☾" : "☀︎"}</Toggle>
             <Tabs>
                 <Tab
                     isActive={category === Categories.TO_DO}
